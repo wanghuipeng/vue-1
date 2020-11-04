@@ -3,7 +3,7 @@ import { initGlobalAPI } from './global-api/index'
 import { isServerRendering } from 'core/util/env'
 import { FunctionalRenderContext } from 'core/vdom/create-functional-component'
 
-/* 在引用Vue的时候给Vue初始化一些全局配置和API */
+/* 给Vue初始化一些全局配置和API */
 initGlobalAPI(Vue)
 
 /* 在Vue.protoType上添加$isServer属性，该属性代理了isServerRendering方法，该属性一般用于服务器渲染，监听是否是服务器环境 */
