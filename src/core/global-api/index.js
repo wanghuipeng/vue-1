@@ -67,9 +67,11 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   /* 合并KeepAlive中的组件对象 */
   extend(Vue.options.components, builtInComponents)
   
-
+  /* 初始化vue的安装插件函数 */
   initUse(Vue)
+  /* 初始化vue的mixin函数 */
   initMixin(Vue)
+  /* 初始化vue的extend函数 */
   initExtend(Vue)
   /* 为vue添加静态方法，component，directive，filter*/
   initAssetRegisters(Vue)
