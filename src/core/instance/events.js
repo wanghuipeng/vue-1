@@ -38,7 +38,7 @@ function createOnceHandler (event, fn) {
     }
   }
 }
-
+/* 更新组件事件 */
 export function updateComponentListeners (
   vm: Component,
   listeners: Object,
@@ -48,9 +48,10 @@ export function updateComponentListeners (
   updateListeners(listeners, oldListeners || {}, add, remove, createOnceHandler, vm)
   target = undefined
 }
-
+/* 初始化事件绑定方法 */
 export function eventsMixin (Vue: Class<Component>) {
   const hookRE = /^hook:/
+  /* 绑定on事件 */
   Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {
     const vm: Component = this
     if (Array.isArray(event)) {
@@ -67,18 +68,20 @@ export function eventsMixin (Vue: Class<Component>) {
     }
     return vm
   }
-
+  /* 绑定once事件 */
   Vue.prototype.$once = function (event: string, fn: Function): Component {
     const vm: Component = this
     function on () {
+      // 解绑事件
       vm.$off(event, on)
+      // 执行事件
       fn.apply(vm, arguments)
     }
     on.fn = fn
     vm.$on(event, on)
     return vm
   }
-
+  /* 绑定off事件 */
   Vue.prototype.$off = function (event?: string | Array<string>, fn?: Function): Component {
     const vm: Component = this
     // all
@@ -108,13 +111,14 @@ export function eventsMixin (Vue: Class<Component>) {
     while (i--) {
       cb = cbs[i]
       if (cb === fn || cb.fn === fn) {
+        /* 清空数组 */
         cbs.splice(i, 1)
         break
       }
     }
     return vm
   }
-
+  /* 绑定emit事件 */
   Vue.prototype.$emit = function (event: string): Component {
     const vm: Component = this
     if (process.env.NODE_ENV !== 'production') {
@@ -132,9 +136,11 @@ export function eventsMixin (Vue: Class<Component>) {
     let cbs = vm._events[event]
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
+      /* 将数组变成一个真正的数组 */
       const args = toArray(arguments, 1)
       const info = `event handler for "${event}"`
       for (let i = 0, l = cbs.length; i < l; i++) {
+        //
         invokeWithErrorHandling(cbs[i], vm, args, vm, info)
       }
     }
