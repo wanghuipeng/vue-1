@@ -79,14 +79,14 @@ export function initExtend (Vue: GlobalAPI) {
     return Sub
   }
 }
-
+/* 初始化属性，并且把组件的属性加入到观察者中 */
 function initProps (Comp) {
   const props = Comp.options.props
   for (const key in props) {
     proxy(Comp.prototype, `_props`, key)
   }
 }
-
+/* 定义计算属性,并且把属性的数据添加到对象监听中 */
 function initComputed (Comp) {
   const computed = Comp.options.computed
   for (const key in computed) {
