@@ -140,7 +140,7 @@ export function eventsMixin (Vue: Class<Component>) {
       const args = toArray(arguments, 1)
       const info = `event handler for "${event}"`
       for (let i = 0, l = cbs.length; i < l; i++) {
-        //
+        /* 如果发生错误则发出报错警告 */
         invokeWithErrorHandling(cbs[i], vm, args, vm, info)
       }
     }
