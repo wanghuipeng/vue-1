@@ -33,9 +33,12 @@ export function initMixin (Vue: Class<Component>) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
+      /* 初始化内部组件 */
       initInternalComponent(vm, options)
     } else {
+      /* 合并参数，将两个对象合并成一个对象，将父对象的值和子对象的值合并，优先取子对象的值 */
       vm.$options = mergeOptions(
+        /* 解析constructor上的参数属性 */
         resolveConstructorOptions(vm.constructor),
         options || {},
         vm
@@ -52,10 +55,13 @@ export function initMixin (Vue: Class<Component>) {
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
+    /* 触发beforeCreate钩子函数 */
     callHook(vm, 'beforeCreate')
+    /* 该方法在data/props之前被完成 */
     initInjections(vm) // resolve injections before data/props
     initState(vm)
     initProvide(vm) // resolve provide after data/props
+    /* 触发created钩子函数 */
     callHook(vm, 'created')
 
     /* istanbul ignore if */
@@ -72,10 +78,14 @@ export function initMixin (Vue: Class<Component>) {
 }
 
 export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
+  /* 把组件构造函数的options挂载到vm.$options的_proto_上 */
   const opts = vm.$options = Object.create(vm.constructor.options)
   // doing this because it's faster than dynamic enumeration.
-  const parentVnode = options._parentVnode
-  opts.parent = options.parent
+  
+  /* 把传入参数的option的_parentVnode挂载到组件实例$options上 */
+  const parentVnode = options._parentVnode   /* _parentVnode是该组件实例的vnode对象 */
+  /* 把传入参数的option的parent挂载到组件实例$options上 */
+  opts.parent = options.parent /*  parent是该组件的父组件对象（根实例） */
   opts._parentVnode = parentVnode
 
   const vnodeComponentOptions = parentVnode.componentOptions
