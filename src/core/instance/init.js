@@ -87,24 +87,36 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   /* 把传入参数的option的parent挂载到组件实例$options上 */
   opts.parent = options.parent /*  parent是该组件的父组件对象（根实例） */
   opts._parentVnode = parentVnode
-
+  
+  /* 组件参数 */
   const vnodeComponentOptions = parentVnode.componentOptions
+  /* 组件数据 */
   opts.propsData = vnodeComponentOptions.propsData
+  /* 组件事件 */
   opts._parentListeners = vnodeComponentOptions.listeners
+  /* 组件子节点 */
   opts._renderChildren = vnodeComponentOptions.children
+  /* 组件的标签 */
   opts._componentTag = vnodeComponentOptions.tag
 
   if (options.render) {
+    /* 渲染函数 */
     opts.render = options.render
+    /* 静态渲染函数 */
     opts.staticRenderFns = options.staticRenderFns
   }
 }
 
+/* 解析构造函数的参数，合并、过滤重复的参数 */
 export function resolveConstructorOptions (Ctor: Class<Component>) {
   let options = Ctor.options
-  if (Ctor.super) {
+  /* 有super属性，说明Ctor是Vue.extend构建的子类 */
+  if (Ctor.super) { // 超类
+    /* 回调超类，表示继承父类 */
     const superOptions = resolveConstructorOptions(Ctor.super)
+    /* Vue构造函数上的options，如directives，filters */
     const cachedSuperOptions = Ctor.superOptions
+    /* 如果超类的options不等于子类的options */    
     if (superOptions !== cachedSuperOptions) {
       // super option changed,
       // need to resolve new options.
@@ -115,6 +127,7 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
       if (modifiedOptions) {
         extend(Ctor.extendOptions, modifiedOptions)
       }
+      /* 合并两个对象，优先取Ctor.extendOptions */
       options = Ctor.options = mergeOptions(superOptions, Ctor.extendOptions)
       if (options.name) {
         options.components[options.name] = Ctor
