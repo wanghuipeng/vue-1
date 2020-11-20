@@ -4,8 +4,10 @@ import { hasOwn } from 'shared/util'
 import { warn, hasSymbol } from '../util/index'
 import { defineReactive, toggleObserving } from '../observer/index'
 
+/* 初始化provide */
 export function initProvide (vm: Component) {
-  const provide = vm.$options.provide
+  /* provide选项是一个对象或者是一个返回对象的函数 */
+  const provide = vm.$options.provide  
   if (provide) {
     vm._provided = typeof provide === 'function'
       ? provide.call(vm)
@@ -13,6 +15,7 @@ export function initProvide (vm: Component) {
   }
 }
 
+/* 初始化inject */
 export function initInjections (vm: Component) {
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
@@ -29,6 +32,7 @@ export function initInjections (vm: Component) {
           )
         })
       } else {
+        /* 添加观察者get set 方法 */
         defineReactive(vm, key, result[key])
       }
     })
@@ -36,10 +40,12 @@ export function initInjections (vm: Component) {
   }
 }
 
+/* inject选项是一个字符串数组或者是一个对象 */
 export function resolveInject (inject: any, vm: Component): ?Object {
   if (inject) {
     // inject is :any because flow is not smart enough to figure out cached
     const result = Object.create(null)
+    /* 判断是或否支持Symbol数据类型 */
     const keys = hasSymbol
       ? Reflect.ownKeys(inject)
       : Object.keys(inject)
