@@ -17,6 +17,7 @@ export function initProvide (vm: Component) {
 
 /* 初始化inject */
 export function initInjections (vm: Component) {
+  /* 根据注册的inject，通过$parent向上查找对应的provide */
   const result = resolveInject(vm.$options.inject, vm)
   if (result) {
     toggleObserving(false)
@@ -32,7 +33,7 @@ export function initInjections (vm: Component) {
           )
         })
       } else {
-        /* 添加观察者get set 方法 */
+        /* 遍历key集合，对其进行响应式监听 */
         defineReactive(vm, key, result[key])
       }
     })
@@ -41,6 +42,7 @@ export function initInjections (vm: Component) {
 }
 
 /* inject选项是一个字符串数组或者是一个对象 */
+/* 通过遍历source.$parent逐级向上查找，直到查找到对应的provide */
 export function resolveInject (inject: any, vm: Component): ?Object {
   if (inject) {
     // inject is :any because flow is not smart enough to figure out cached
