@@ -65,6 +65,7 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
+  /* 更新节点 */
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
@@ -73,6 +74,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
+    /* 基于后端渲染Vue.prototype.__patch__被用来作为一个入口 */
     if (!prevVnode) {
       // initial render
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
@@ -82,6 +84,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     restoreActiveInstance()
     // update __vue__ reference
+    /* 更新新的实例对象的__vue__ */
     if (prevEl) {
       prevEl.__vue__ = null
     }
@@ -89,15 +92,18 @@ export function lifecycleMixin (Vue: Class<Component>) {
       vm.$el.__vue__ = vm
     }
     // if parent is an HOC, update its $el as well
+    /* 如果parant是一个高阶函数，那么也要更新它的$el */
     if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
       vm.$parent.$el = vm.$el
     }
     // updated hook is called by the scheduler to ensure that children are
     // updated in a parent's updated hook.
   }
-
+ 
+  /* 强制更新 */
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
+    /* 如果观察者在就更新数据 */
     if (vm._watcher) {
       vm._watcher.update()
     }
@@ -105,6 +111,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
 
   Vue.prototype.$destroy = function () {
     const vm: Component = this
+    /* 如果已经 */
     if (vm._isBeingDestroyed) {
       return
     }
