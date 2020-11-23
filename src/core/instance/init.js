@@ -112,16 +112,17 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
   let options = Ctor.options
   /* 有super属性，说明Ctor是Vue.extend构建的子类 */
   if (Ctor.super) { // 超类
-    /* 回调超类，表示继承父类 */
+    /* 回调超类，表示继承父类，获取父类正确的options */
     const superOptions = resolveConstructorOptions(Ctor.super)
-    /* Vue构造函数上的options，如directives，filters */
+    /* 获取执行Child = Parent.extend()时缓存的父类的options */
     const cachedSuperOptions = Ctor.superOptions
-    /* 如果超类的options不等于子类的options */    
+    /* 对两者通过比较来判断之后是否改变过，如果通过.mixin、.extend导致父类继承的值改变了，也就导致options改变了，如果改变了，就进行修正 */    
     if (superOptions !== cachedSuperOptions) {
       // super option changed,
       // need to resolve new options.
       Ctor.superOptions = superOptions
       // check if there are any late-modified/attached options (#4976)
+      /* 解析新增的那部分options */
       const modifiedOptions = resolveModifiedOptions(Ctor)
       // update base extend options
       if (modifiedOptions) {
