@@ -29,27 +29,34 @@ export function setActiveInstance(vm: Component) {
   }
 }
 
-/* 初始化生命周期 */
+/* 初始化一些生命周期相关的属性 */
 export function initLifecycle (vm: Component) {
+  /* 把mergeOptions后的options赋值给options变量 */
   const options = vm.$options
 
   // locate first non-abstract parent
-  /* 定义一个非抽象的父节点 */
+  /* 定义第一个非抽象的父组件，将当前vm实例的父实例parent赋值给parent变量 */
   let parent = options.parent
+  /* 如果父实例存在，且该实例是非抽象组件（抽象组件如keep-alive） */
   if (parent && !options.abstract) {
+    /* 如果父实例是抽象组件，则继续查找parent上的parent，知道找到非抽象组件为止 */
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
+    /* 找到非抽象组件后，将当前vm实例push到定位的第一个非抽象parent的$children属性上 */
     parent.$children.push(vm)
   }
 
   vm.$parent = parent
+  /* 如果当前实例没有父实例，则此实例将会是自己 */
   vm.$root = parent ? parent.$root : vm
-
+  /* 当前实例的直接子组件 */
   vm.$children = []
+  /* 一个对象，持有已注册过ref的所有子组件 */
   vm.$refs = {}
 
   vm._watcher = null
+  /* 表示keep-alive中组件状态，如被激活，该值false，否则为true */
   vm._inactive = null
   vm._directInactive = false
   vm._isMounted = false
