@@ -111,7 +111,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
 
   Vue.prototype.$destroy = function () {
     const vm: Component = this
-    /* 如果已经 */
+    /* 如果已经销毁则不再执行 */
     if (vm._isBeingDestroyed) {
       return
     }
@@ -119,10 +119,12 @@ export function lifecycleMixin (Vue: Class<Component>) {
     vm._isBeingDestroyed = true
     // remove self from parent
     const parent = vm.$parent
+    /* 删除父节点 */
     if (parent && !parent._isBeingDestroyed && !vm.$options.abstract) {
       remove(parent.$children, vm)
     }
     // teardown watchers
+    /* 该组件下所有的watcher从其所在的Dep中释放 */
     if (vm._watcher) {
       vm._watcher.teardown()
     }
@@ -136,30 +138,35 @@ export function lifecycleMixin (Vue: Class<Component>) {
       vm._data.__ob__.vmCount--
     }
     // call the last hook...
+    /* 调用最后一个钩子函数 */
     vm._isDestroyed = true
     // invoke destroy hooks on current rendered tree
     vm.__patch__(vm._vnode, null)
     // fire destroyed hook
     callHook(vm, 'destroyed')
     // turn off all instance listeners.
+    /* 移除所有的监听事件 */
     vm.$off()
     // remove __vue__ reference
     if (vm.$el) {
       vm.$el.__vue__ = null
     }
     // release circular reference (#6759)
+    /* 销毁父节点 */
     if (vm.$vnode) {
       vm.$vnode.parent = null
     }
   }
 }
 
+/* 挂载组件 */
 export function mountComponent (
-  vm: Component,
-  el: ?Element,
+  vm: Component,   //vnode
+  el: ?Element,    //dom
   hydrating?: boolean
 ): Component {
   vm.$el = el
+  /* 如果render函数不存在的时候创建一个空的VNode节点 */
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
@@ -181,7 +188,8 @@ export function mountComponent (
     }
   }
   callHook(vm, 'beforeMount')
-
+  
+  /* updateComponent作为Watcher对象的getter函数，用来依赖收集 */
   let updateComponent
   /* istanbul ignore if */
   if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
@@ -222,7 +230,9 @@ export function mountComponent (
   // manually mounted instance, call mounted on self
   // mounted is called for render-created child components in its inserted hook
   if (vm.$vnode == null) {
+    /* 标志位，代表该组件已挂载 */
     vm._isMounted = true
+    /* 调用mounted钩子 */
     callHook(vm, 'mounted')
   }
   return vm
