@@ -238,6 +238,7 @@ export function mountComponent (
   return vm
 }
 
+/* 更新子组件 */
 export function updateChildComponent (
   vm: Component,
   propsData: ?Object,
@@ -271,40 +272,53 @@ export function updateChildComponent (
     vm.$options._renderChildren ||  // has old static slots
     hasDynamicScopedSlot
   )
-
+  
+  /* 父节点 */
   vm.$options._parentVnode = parentVnode
+  /* 无需重新渲染即可更新vm的占位符节点 */
   vm.$vnode = parentVnode // update vm's placeholder node without re-render
 
   if (vm._vnode) { // update child tree's parent
     vm._vnode.parent = parentVnode
   }
+  /* 子节点 */
   vm.$options._renderChildren = renderChildren
 
   // update $attrs and $listeners hash
   // these are also reactive so they may trigger child update if the child
   // used them during render
+  /* 虚拟dom的属性 */
   vm.$attrs = parentVnode.data.attrs || emptyObject
+  /* 虚拟的dom的事件 */
   vm.$listeners = listeners || emptyObject
 
   // update props
   if (propsData && vm.$options.props) {
     toggleObserving(false)
+    /* 获取属性对象 */
     const props = vm._props
+    /* 获取属性的prop的key */
     const propKeys = vm.$options._propKeys || []
     for (let i = 0; i < propKeys.length; i++) {
       const key = propKeys[i]
       const propOptions: any = vm.$options.props // wtf flow?
+      /* 验证props是否是规范数据，并且为props添加value.__ob__属性，把props添加到观察者中 */
       props[key] = validateProp(key, propOptions, propsData, vm)
     }
     toggleObserving(true)
     // keep a copy of raw propsData
+    /* 保留原始propsData的副本 */
     vm.$options.propsData = propsData
   }
 
   // update listeners
+  /* 更新事件 */
   listeners = listeners || emptyObject
+  /* 旧的事件 */
   const oldListeners = vm.$options._parentListeners
+  /* 新的事件 */
   vm.$options._parentListeners = listeners
+  /* 更新组件事件 */
   updateComponentListeners(vm, listeners, oldListeners)
 
   // resolve slots + force update if has children
@@ -318,6 +332,7 @@ export function updateChildComponent (
   }
 }
 
+/* 循环父节点，如果有不活跃的则返回真 */
 function isInInactiveTree (vm) {
   while (vm && (vm = vm.$parent)) {
     if (vm._inactive) return true
@@ -325,12 +340,15 @@ function isInInactiveTree (vm) {
   return false
 }
 
+/* 判断是否有不活跃的组件，如果有活跃的组件则触发钩子函数activated */
 export function activateChildComponent (vm: Component, direct?: boolean) {
   if (direct) {
     vm._directInactive = false
+    /* 不活跃的树 */
     if (isInInactiveTree(vm)) {
       return
     }
+    /* 单个不活跃 */
   } else if (vm._directInactive) {
     return
   }
@@ -343,6 +361,7 @@ export function activateChildComponent (vm: Component, direct?: boolean) {
   }
 }
 
+/* 循环子组件和父组件，判断是否有禁止的组件，如果有活跃组件则执行生命后期函数deactived */
 export function deactivateChildComponent (vm: Component, direct?: boolean) {
   if (direct) {
     vm._directInactive = true
