@@ -51,7 +51,8 @@ if (process.env.NODE_ENV !== 'production') {
       }
     })
   }
-
+  
+  /* 即handler.get()代理实例，此Trap函数在读取地理对象的某个属性时触发 */
   const hasHandler = {
     has (target, key) {
       const has = key in target
@@ -64,7 +65,8 @@ if (process.env.NODE_ENV !== 'production') {
       return has || !isAllowed
     }
   }
-
+  
+  /* 即handler.has()代理实例，此Trap函数在判断代理对象是否拥有某个属性时触发 */
   const getHandler = {
     get (target, key) {
       if (typeof key === 'string' && !(key in target)) {
@@ -76,12 +78,14 @@ if (process.env.NODE_ENV !== 'production') {
   }
 
   initProxy = function initProxy (vm) {
+    /* 如果当前环境中Proxy可用，则调用Proxy方法，给Vue添加代理 */
     if (hasProxy) {
       // determine which proxy handler to use
       const options = vm.$options
       const handlers = options.render && options.render._withStripped
         ? getHandler
         : hasHandler
+      /* getHandler，hasHandler这两个函数分别定义拦截vm的get行为和has行为 */
       vm._renderProxy = new Proxy(vm, handlers)
     } else {
       vm._renderProxy = vm
