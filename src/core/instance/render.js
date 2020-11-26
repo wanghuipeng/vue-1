@@ -16,25 +16,33 @@ import VNode, { createEmptyVNode } from '../vdom/vnode'
 
 import { isUpdatingChildComponent } from './lifecycle'
 
+/* 初始化render */
 export function initRender (vm: Component) {
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null // v-once cached trees
+  /* 获取参数 */
   const options = vm.$options
+  /* 父树上的占位符节点 */
   const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
+  /* this上下文 */
   const renderContext = parentVnode && parentVnode.context
+  /* 判断children是否有分发式插槽，过滤掉空插槽，且收集插槽 */
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
   vm.$scopedSlots = emptyObject
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
   // args order: tag, data, children, normalizationType, alwaysNormalize
   // internal version is used by render functions compiled from templates
+  /* 将createElement函数绑定到vm实例对象上，这样就能得到正确的render上下文 */
   vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
   // normalization is always applied for the public version, used in
   // user-written render functions.
+  /* 规范化一直应用于公共版本，用于用户编写的render函数 */
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
 
   // $attrs & $listeners are exposed for easier HOC creation.
   // they need to be reactive so that HOCs using them are always updated
+  /* 父级组件数据 */
   const parentData = parentVnode && parentVnode.data
 
   /* istanbul ignore else */
@@ -46,6 +54,7 @@ export function initRender (vm: Component) {
       !isUpdatingChildComponent && warn(`$listeners is readonly.`, vm)
     }, true)
   } else {
+    /* 监听事件（通过defineProperty的set方法通知订阅者有新的数据修改） */
     defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, null, true)
     defineReactive(vm, '$listeners', options._parentListeners || emptyObject, null, true)
   }
@@ -65,7 +74,8 @@ export function renderMixin (Vue: Class<Component>) {
   Vue.prototype.$nextTick = function (fn: Function) {
     return nextTick(fn, this)
   }
-
+  
+  /* 渲染函数 */
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
@@ -112,6 +122,7 @@ export function renderMixin (Vue: Class<Component>) {
       vnode = vnode[0]
     }
     // return empty vnode in case the render function errored out
+    /* 如果VNode节点没有创建成功则创建一个空节点 */
     if (!(vnode instanceof VNode)) {
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
         warn(
