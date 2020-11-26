@@ -169,6 +169,7 @@ function initData (vm: Component) {
   observe(data, true /* asRootData */)
 }
 
+/* 如果数据是函数类型，则执行该函数获取数据 */
 export function getData (data: Function, vm: Component): any {
   // #7573 disable dep collection when invoking data getters
   pushTarget()
@@ -187,8 +188,10 @@ const computedWatcherOptions = { lazy: true }
 /* 初始化computed */
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line
+  /* 创建一个新的监听者空对象 */
   const watchers = vm._computedWatchers = Object.create(null)
   // computed properties are just getters during SSR
+  /* 判断是否是node服务器环境 */
   const isSSR = isServerRendering()
 
   for (const key in computed) {
@@ -214,6 +217,7 @@ function initComputed (vm: Component, computed: Object) {
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
+    /* 如果computed属性不存在与虚拟dom，则定义该计算属性，并把该属性的数据添加到对象监听中 */
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
     } else if (process.env.NODE_ENV !== 'production') {
@@ -226,6 +230,7 @@ function initComputed (vm: Component, computed: Object) {
   }
 }
 
+/* 定义计算属性 */
 export function defineComputed (
   target: any,
   key: string,
@@ -254,17 +259,20 @@ export function defineComputed (
       )
     }
   }
-  /*  */
+  /* 添加监听观察者（即添加对象监听） */
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+/* 创建计算属性的getter */
 function createComputedGetter (key) {
   return function computedGetter () {
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
+      /* 实际是脏查询，在计算属性中的依赖发生改变时dirty会变为true，在get的时候重新计算计算属性的输出值 */
       if (watcher.dirty) {
         watcher.evaluate()
       }
+      /* 依赖收集 */
       if (Dep.target) {
         watcher.depend()
       }
@@ -273,12 +281,14 @@ function createComputedGetter (key) {
   }
 }
 
+/*  */
 function createGetterInvoker(fn) {
   return function computedGetter () {
     return fn.call(this, this)
   }
 }
 
+/* 初始化方法 */
 function initMethods (vm: Component, methods: Object) {
   const props = vm.$options.props
   for (const key in methods) {
