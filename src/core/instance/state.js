@@ -313,14 +313,18 @@ function initMethods (vm: Component, methods: Object) {
         )
       }
     }
+    /* 判断方法是否是函数类型，如果不是则设置为空函数，如果时则执行该函数 */
     vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
   }
 }
 
+/* 初始化Watch监听 */
 function initWatch (vm: Component, watch: Object) {
   for (const key in watch) {
     const handler = watch[key]
+    /* 如果是数组handler */
     if (Array.isArray(handler)) {
+      /* 循环数组，创建监听 */
       for (let i = 0; i < handler.length; i++) {
         createWatcher(vm, key, handler[i])
       }
@@ -330,22 +334,35 @@ function initWatch (vm: Component, watch: Object) {
   }
 }
 
+/* 为数据创建Watcher观察者 */
 function createWatcher (
   vm: Component,
   expOrFn: string | Function,
   handler: any,
   options?: Object
 ) {
+  /* 只有当对象是纯js对象的时候返回true */
   if (isPlainObject(handler)) {
+    /*
+      这里是当watch的写法是这样的时候
+      watch: {
+          test: {
+              handler: function () {},
+              deep: true
+          }
+      }
+    */
     options = handler
     handler = handler.handler
   }
   if (typeof handler === 'string') {
     handler = vm[handler]
   }
+  /* 用$watch方法创建一个watch来观察对象的变化 */
   return vm.$watch(expOrFn, handler, options)
 }
 
+/* 数据绑定 */
 export function stateMixin (Vue: Class<Component>) {
   // flow somehow has problems with directly declared definition object
   // when using Object.defineProperty, so we have to procedurally build up
@@ -368,10 +385,13 @@ export function stateMixin (Vue: Class<Component>) {
   }
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
-
+  
+  /* 添加一个数组数据或对象数据 */
   Vue.prototype.$set = set
+  /* 删除一个数组数据或对象数据 */
   Vue.prototype.$delete = del
-
+  
+  /* 用来为对象建立观察者，监听变化 */
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,
@@ -384,6 +404,7 @@ export function stateMixin (Vue: Class<Component>) {
     options = options || {}
     options.user = true
     const watcher = new Watcher(vm, expOrFn, cb, options)
+    /* 有immediate参数的时候会立即执行 */
     if (options.immediate) {
       try {
         cb.call(vm, watcher.value)
@@ -391,7 +412,9 @@ export function stateMixin (Vue: Class<Component>) {
         handleError(error, vm, `callback for immediate watcher "${watcher.expression}"`)
       }
     }
+    /* 返回一个取消观察函数，用来停止触发回调 */
     return function unwatchFn () {
+      /* 将自身从所有依赖收集订阅列表中删除 */
       watcher.teardown()
     }
   }
