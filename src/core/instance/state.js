@@ -254,6 +254,7 @@ export function defineComputed (
       )
     }
   }
+  /*  */
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
