@@ -67,14 +67,18 @@ export function initState (vm: Component) {
   }
 }
 
+/* 初始化props */
 function initProps (vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
+  /* 缓存属性的key，使得将来能直接使用数组的索引来更新props来代替动态的枚举对象 */ 
   const keys = vm.$options._propKeys = []
+  /* 根据$parent是否存在来判断当前是否是根节点 */
   const isRoot = !vm.$parent
   // root instance props should be converted
+  /* 如果根节点不存在则不监听观察者 */
   if (!isRoot) {
     toggleObserving(false)
   }
@@ -84,6 +88,7 @@ function initProps (vm: Component, propsOptions: Object) {
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
       const hyphenatedKey = hyphenate(key)
+      /* 判断是否是保留字段，如果是则发出警告 */
       if (isReservedAttribute(hyphenatedKey) ||
           config.isReservedAttr(hyphenatedKey)) {
         warn(
@@ -108,14 +113,18 @@ function initProps (vm: Component, propsOptions: Object) {
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
+    /* 如果vm上没有props属性，而原型上有，则把使用this.[propsKey]来获取值 */
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
   }
+  /* 设置监听观察者 */
   toggleObserving(true)
 }
 
+/* 初始化data */
 function initData (vm: Component) {
+  /* 获取data中的数据 */
   let data = vm.$options.data
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
@@ -136,6 +145,7 @@ function initData (vm: Component) {
   while (i--) {
     const key = keys[i]
     if (process.env.NODE_ENV !== 'production') {
+      /* 如果数据中的key与事件中定义的key一样则发出警告 */
       if (methods && hasOwn(methods, key)) {
         warn(
           `Method "${key}" has already been defined as a data property.`,
@@ -143,17 +153,19 @@ function initData (vm: Component) {
         )
       }
     }
+    /* 如果数据中的key与props中定义的key一样则发出警告 */
     if (props && hasOwn(props, key)) {
       process.env.NODE_ENV !== 'production' && warn(
         `The data property "${key}" is already declared as a prop. ` +
         `Use prop default value instead.`,
         vm
       )
-    } else if (!isReserved(key)) {
+    } else if (!isReserved(key)) { /* 如果不是以$或_开头 */
       proxy(vm, `_data`, key)
     }
   }
   // observe data
+  /* 进行双向数据绑定 */
   observe(data, true /* asRootData */)
 }
 
@@ -172,6 +184,7 @@ export function getData (data: Function, vm: Component): any {
 
 const computedWatcherOptions = { lazy: true }
 
+/* 初始化computed */
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line
   const watchers = vm._computedWatchers = Object.create(null)
