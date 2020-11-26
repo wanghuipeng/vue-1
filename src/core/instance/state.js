@@ -35,16 +35,21 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+/* 通过proxy函数将_data或者_props等上面的数据代理到vm实例上，这样就可以用app.text代替app._data.text了 */
 export function proxy (target: Object, sourceKey: string, key: string) {
+  /* 设置set函数 */
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
   }
+  /* 设置get函数 */
   sharedPropertyDefinition.set = function proxySetter (val) {
     this[sourceKey][key] = val
   }
+  /* 设置监听观察者 */
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+/* 初始化状态（props、methods、data、computed、watch） */
 export function initState (vm: Component) {
   vm._watchers = []
   const opts = vm.$options
@@ -53,6 +58,7 @@ export function initState (vm: Component) {
   if (opts.data) {
     initData(vm)
   } else {
+    /* 该组件没有data的时候绑定一个空对象 */
     observe(vm._data = {}, true /* asRootData */)
   }
   if (opts.computed) initComputed(vm, opts.computed)
